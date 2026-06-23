@@ -23,6 +23,48 @@ Por isso, um técnico precisa saber identificar se uma falha está relacionada a
 
 Este projeto tem como objetivo organizar esses conceitos de forma prática e documentada.
 
+## Estrutura do projeto
+data-center-network-basics/
+│
+├── README.md
+├── docs/
+│   ├── dns.md
+│   ├── roteamento.md
+│   ├── ipv6.md
+│   └── troubleshooting-servidor-inacessivel.md
+│
+├── comandos/
+│   └── comandos-de-diagnostico.md
+│
+└── imagens/
+    └── topologia-data-center-basica.png
+
+    
+## Topologia conceitual
+
+Internet
+   |
+Firewall / Gateway
+   |
+Switch Core
+   |
+------------------------------------------------
+|                    |                         |
+VLAN Servidores      VLAN Monitoramento        VLAN Administração
+|                    |                         |
+Servidor Web         Servidor Grafana          Estação Técnica
+Servidor DNS         Prometheus                Acesso Suporte
+
+## Comandos utilizados
+ip addr
+ip route
+ping
+ping -6
+traceroute
+dig
+nslookup
+curl
+
 ## Cenário simulado
 
 Um servidor hospedado em um ambiente de Data Center está ligado, mas a aplicação não responde pelo nome de domínio.
@@ -31,3 +73,17 @@ Exemplo:
 
 ```text
 app.empresa.local
+
+
+## Status do projeto
+
+Em desenvolvimento.
+
+Autor
+
+Joandson Oliveira
+Transição profissional para Infraestrutura, Cloud Computing e Data Center.
+
+
+
+
