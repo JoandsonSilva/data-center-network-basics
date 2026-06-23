@@ -23,7 +23,9 @@ Por isso, um técnico precisa saber identificar se uma falha está relacionada a
 
 Este projeto tem como objetivo organizar esses conceitos de forma prática e documentada.
 
-## Estrutura do projeto
+## Estrutura prevista do projeto
+
+```text
 data-center-network-basics/
 │
 ├── README.md
@@ -38,10 +40,11 @@ data-center-network-basics/
 │
 └── imagens/
     └── topologia-data-center-basica.png
-
+```
     
 ## Topologia conceitual
 
+ ```text
 Internet
    |
 Firewall / Gateway
@@ -54,7 +57,7 @@ VLAN Servidores      VLAN Monitoramento        VLAN Administração
 |                    |                         |
 Servidor Web         Servidor Grafana          Estação Técnica
 Servidor DNS         Prometheus                Acesso Suporte
-
+```
 ## Comandos utilizados
 ip addr
 ip route
