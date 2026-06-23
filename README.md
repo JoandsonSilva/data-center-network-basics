@@ -73,7 +73,7 @@ Exemplo:
 
 ```text
 app.empresa.local
-
+```
 
 ## Status do projeto
 
@@ -83,7 +83,6 @@ Autor
 
 Joandson Oliveira
 Transição profissional para Infraestrutura, Cloud Computing e Data Center.
-
 
 
 
