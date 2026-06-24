@@ -205,8 +205,17 @@ nslookup -type=AAAA google.com
 
 Comando:
 
+
 ```bash
 dig AAAA google.com
+```
+
+## macOS
+
+### Ver IP da interface principal
+
+```bash
+ipconfig getifaddr en0
 ```
 
 ## Objetivo do teste
