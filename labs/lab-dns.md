@@ -6,6 +6,8 @@ Este laboratório tem como objetivo praticar comandos de diagnóstico DNS para i
 
 O foco é simular uma análise inicial feita por um técnico de Data Center ao investigar uma aplicação ou servidor inacessível pelo nome.
 
+Neste laboratório, o macOS representa a estação técnica de acesso, enquanto a VM Linux representa um servidor em ambiente simulado de Data Center. A conexão via SSH permite executar comandos de diagnóstico diretamente no servidor, validando IP, rota, DNS e conectividade.
+
 ## Cenário simulado
 
 Um servidor de aplicação em um ambiente de Data Center está ligado, mas os usuários relatam que não conseguem acessar a aplicação pelo nome:
