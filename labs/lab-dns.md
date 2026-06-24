@@ -353,6 +353,24 @@ Interpretação:
 Conclusão geral:
 ```
 
+
+## Evidências
+
+### 1. Configuração DNS da VM Linux
+
+![Configuração DNS](../evidencias/dns/01-dns-config-vm-linux.png)
+
+### 2. Resolução DNS com nslookup
+
+![nslookup google.com](../evidencias/dns/02-nslookup-google-vm-linux.png)
+
+### 3. Teste de conectividade pelo nome
+
+![ping google.com](../evidencias/dns/03-ping-google-vm-linux.png)
+
+### 4 . IPv6 - DNS AAAA
+![ping google.com](../evidencias/dns/04-dig-aaaa-google-vm-linux.png)
+
 ---
 
 # Conclusão do laboratório
@@ -360,5 +378,9 @@ Conclusão geral:
 Este laboratório demonstrou como utilizar comandos básicos para diagnosticar problemas de DNS.
 
 Em uma rotina de Data Center, esses testes ajudam o técnico a identificar se uma falha de acesso está relacionada à resolução de nomes, conectividade, rota, IPv6, firewall ou serviço.
+
+A VM Linux possui servidor DNS configurado, conseguiu resolver o domínio google.com e realizou teste de conectividade pelo nome.
+
+Com isso, neste cenário, não foi identificada falha de DNS. Em um ambiente de Data Center, esse tipo de teste ajudaria a separar problemas de resolução de nomes de problemas de rota, firewall ou serviço.
 
 O objetivo não é apenas executar comandos, mas interpretar os resultados e registrar evidências para apoiar a resolução ou escalonamento do incidente.
