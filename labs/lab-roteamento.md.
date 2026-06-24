@@ -1,0 +1,446 @@
+# Lab Roteamento — Diagnóstico de Gateway e Rotas
+
+## Objetivo
+
+Este laboratório tem como objetivo praticar comandos de diagnóstico de roteamento, gateway e caminho de rede.
+
+O foco é simular uma análise inicial feita por um técnico de Data Center ao investigar um servidor que está ligado, mas não consegue acessar redes externas, sistemas internos ou serviços na internet.
+
+## Cenário simulado
+
+Neste laboratório:
+
+- O macOS representa a estação técnica de acesso.
+- A VM Linux acessada via SSH representa um servidor em ambiente simulado de Data Center.
+
+O técnico acessa a VM e precisa verificar se o servidor possui:
+
+- IP válido
+- Gateway configurado
+- Rota padrão
+- Conectividade com a internet
+- Caminho de rede até um destino externo
+
+## Conceito principal
+
+Se um servidor possui IP válido, mas não consegue acessar redes externas, o problema pode estar relacionado a:
+
+- Gateway incorreto
+- Rota padrão ausente
+- Firewall
+- VLAN incorreta
+- Problema no switch ou roteador
+- Bloqueio de saída
+- Falha em algum ponto do caminho até o destino
+
+---
+
+# Ambiente utilizado
+
+Preencher conforme o ambiente usado:
+
+```text
+Estação técnica: macOS
+Servidor simulado: VM Linux via UTM
+Acesso: SSH
+Rede utilizada:
+Data do teste:
+```
+
+---
+
+# Teste 1 — Verificar IP da estação técnica macOS
+
+## Comando no macOS
+
+```bash
+ipconfig getifaddr en0
+```
+
+## Objetivo do teste
+
+Verificar o endereço IP da interface principal do Mac.
+
+Em muitos casos, a interface `en0` representa o Wi-Fi. Caso não retorne resultado, verificar outras interfaces com:
+
+```bash
+ifconfig
+```
+
+## Resultado observado
+
+```text
+Resultado:
+```
+
+## Interpretação técnica
+
+```text
+Interpretação:
+```
+
+Exemplo:
+
+```text
+O macOS possui endereço IP válido na rede local, indicando que a estação técnica está conectada à rede.
+```
+
+---
+
+# Teste 2 — Verificar gateway padrão no macOS
+
+## Comando no macOS
+
+```bash
+route -n get default
+```
+
+## Objetivo do teste
+
+Verificar qual gateway padrão está sendo utilizado pela estação técnica.
+
+O gateway padrão é o caminho usado para acessar redes externas.
+
+## Resultado observado
+
+```text
+Resultado:
+```
+
+## Interpretação técnica
+
+```text
+Interpretação:
+```
+
+Exemplo:
+
+```text
+Foi identificado um gateway padrão configurado. Isso indica que a estação técnica possui uma rota de saída para redes externas.
+```
+
+---
+
+# Teste 3 — Verificar IP da VM Linux
+
+## Comando dentro da VM Linux
+
+```bash
+ip addr
+```
+
+## Objetivo do teste
+
+Verificar os endereços IP configurados na VM Linux.
+
+Esse teste ajuda a confirmar se o servidor simulado possui IP válido e interface de rede ativa.
+
+## Resultado observado
+
+```text
+Resultado:
+```
+
+## Interpretação técnica
+
+```text
+Interpretação:
+```
+
+Exemplo:
+
+```text
+A VM Linux possui endereço IP válido e interface de rede ativa. Isso indica que a configuração básica de rede está presente no servidor.
+```
+
+---
+
+# Teste 4 — Verificar tabela de rotas da VM Linux
+
+## Comando dentro da VM Linux
+
+```bash
+ip route
+```
+
+## Objetivo do teste
+
+Verificar as rotas configuradas na VM Linux, principalmente a rota padrão.
+
+A rota padrão normalmente aparece como:
+
+```text
+default via ENDERECO_DO_GATEWAY
+```
+
+## Resultado observado
+
+```text
+Resultado:
+```
+
+## Interpretação técnica
+
+```text
+Interpretação:
+```
+
+Exemplo:
+
+```text
+A VM Linux possui rota padrão configurada. Isso indica que o servidor sabe para onde enviar tráfego destinado a redes externas.
+```
+
+---
+
+# Teste 5 — Testar conectividade com o gateway
+
+## Comando dentro da VM Linux
+
+Substituir `IP_DO_GATEWAY` pelo gateway identificado no comando `ip route`.
+
+```bash
+ping IP_DO_GATEWAY
+```
+
+Exemplo:
+
+```bash
+ping 192.168.64.1
+```
+
+## Objetivo do teste
+
+Verificar se a VM Linux consegue se comunicar com o gateway.
+
+## Resultado esperado
+
+O gateway deve responder ao ping.
+
+## Resultado observado
+
+```text
+Resultado:
+```
+
+## Interpretação técnica
+
+```text
+Interpretação:
+```
+
+Exemplo:
+
+```text
+A VM respondeu ao gateway com sucesso. Isso indica que a conectividade local até o gateway está funcionando.
+```
+
+## Atenção
+
+Se o gateway não responder, o problema pode estar em:
+
+- Configuração IP
+- Interface de rede da VM
+- Rede virtual do UTM
+- Firewall
+- Gateway inacessível
+- Problema de conectividade local
+
+---
+
+# Teste 6 — Testar conectividade com IP externo
+
+## Comando dentro da VM Linux
+
+```bash
+ping 8.8.8.8
+```
+
+## Objetivo do teste
+
+Verificar se a VM Linux consegue acessar um IP externo sem depender de DNS.
+
+Esse teste ajuda a separar problemas de roteamento de problemas de DNS.
+
+## Resultado observado
+
+```text
+Resultado:
+```
+
+## Interpretação técnica
+
+```text
+Interpretação:
+```
+
+Use este raciocínio:
+
+```text
+Se o ping para 8.8.8.8 funciona, a VM possui conectividade externa por IP.
+
+Se o ping para 8.8.8.8 falha, o problema pode estar em rota, gateway, firewall, NAT ou conectividade da rede.
+```
+
+---
+
+# Teste 7 — Testar caminho até o destino
+
+## Comando dentro da VM Linux
+
+```bash
+traceroute 8.8.8.8
+```
+
+Caso o comando não esteja instalado em Ubuntu/Debian:
+
+```bash
+sudo apt update
+sudo apt install traceroute -y
+```
+
+## Objetivo do teste
+
+Verificar por quais saltos o tráfego passa até chegar ao destino.
+
+Esse comando ajuda a identificar onde a comunicação pode estar parando.
+
+## Resultado observado
+
+```text
+Resultado:
+```
+
+## Interpretação técnica
+
+```text
+Interpretação:
+```
+
+Exemplo:
+
+```text
+O traceroute mostrou o caminho do tráfego até o destino. Isso ajuda a identificar se a falha ocorre na rede local, no gateway ou em algum ponto externo.
+```
+
+---
+
+# Teste 8 — Testar acesso HTTP
+
+## Comando dentro da VM Linux
+
+```bash
+curl -I https://google.com
+```
+
+## Objetivo do teste
+
+Verificar se a VM consegue acessar um serviço web externo.
+
+Esse teste é útil porque alguns destinos podem bloquear ping, mas responder normalmente via HTTP/HTTPS.
+
+## Resultado observado
+
+```text
+Resultado:
+```
+
+## Interpretação técnica
+
+```text
+Interpretação:
+```
+
+Exemplo:
+
+```text
+O comando retornou cabeçalhos HTTP, indicando que a VM conseguiu acessar o serviço web externo.
+```
+
+---
+
+# Checklist de diagnóstico de roteamento
+
+```text
+[ ] A estação técnica possui IP válido?
+[ ] A estação técnica possui gateway padrão?
+[ ] A VM Linux possui IP válido?
+[ ] A VM Linux possui rota padrão?
+[ ] A VM consegue pingar o gateway?
+[ ] A VM consegue pingar um IP externo?
+[ ] O traceroute mostra caminho até o destino?
+[ ] O acesso HTTP funciona?
+[ ] O problema pode estar relacionado a DNS?
+[ ] O problema pode estar relacionado a rota, firewall ou NAT?
+```
+
+---
+
+# Registro de evidência do laboratório
+
+Preencha após realizar os testes:
+
+```text
+Data:
+Estação técnica:
+Servidor simulado:
+Tipo de acesso:
+
+Teste 1 — IP do macOS:
+Resultado:
+Interpretação:
+
+Teste 2 — Gateway do macOS:
+Resultado:
+Interpretação:
+
+Teste 3 — IP da VM Linux:
+Resultado:
+Interpretação:
+
+Teste 4 — Rotas da VM Linux:
+Resultado:
+Interpretação:
+
+Teste 5 — Ping para gateway:
+Resultado:
+Interpretação:
+
+Teste 6 — Ping para IP externo:
+Resultado:
+Interpretação:
+
+Teste 7 — Traceroute:
+Resultado:
+Interpretação:
+
+Teste 8 — Curl HTTP:
+Resultado:
+Interpretação:
+
+Conclusão geral:
+```
+
+---
+
+# Aplicação em Data Center
+
+Em um ambiente de Data Center, testes de roteamento ajudam o técnico a identificar se um servidor consegue se comunicar com outras redes.
+
+Esse tipo de diagnóstico é importante quando há relatos como:
+
+- Servidor não acessa a internet
+- Aplicação não comunica com banco de dados
+- Monitoramento não coleta métricas do servidor
+- Backup não alcança o destino
+- Servidor responde localmente, mas não acessa sistemas externos
+
+Antes de escalar o incidente, o técnico pode verificar IP, gateway, rota padrão, conectividade externa e caminho do tráfego.
+
+---
+
+# Conclusão do laboratório
+
+Este laboratório demonstrou como validar IP, gateway, rota padrão e conectividade externa usando macOS e uma VM Linux acessada via SSH.
+
+Em uma rotina de Data Center, esses testes ajudam a diferenciar falhas locais, problemas de roteamento, bloqueios de firewall, problemas de NAT ou indisponibilidade de serviços externos.
