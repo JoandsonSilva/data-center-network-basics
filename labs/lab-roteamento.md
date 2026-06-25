@@ -145,7 +145,6 @@ Como o teste foi feito diretamente por IP, ele não depende de DNS. Portanto, se
 ```
 
 ---
-
 # Evidências
 
 ### 1. IP da VM Linux
