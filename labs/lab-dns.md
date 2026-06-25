@@ -1,12 +1,16 @@
 # Lab DNS — Diagnóstico de Resolução de Nomes
 
+## Status da etapa
+
+Etapa 3 de 7 — Lab DNS com evidências.
+
 ## Objetivo
 
 Este laboratório tem como objetivo praticar comandos de diagnóstico DNS para identificar se um problema de acesso está relacionado à resolução de nomes.
 
 O foco é simular uma análise inicial feita por um técnico de Data Center ao investigar uma aplicação ou servidor inacessível pelo nome.
 
-Neste laboratório, o macOS representa a estação técnica de acesso, enquanto a VM Linux representa um servidor em ambiente simulado de Data Center. A conexão via SSH permite executar comandos de diagnóstico diretamente no servidor, validando IP, rota, DNS e conectividade.
+Neste laboratório, o macOS representa a estação técnica de acesso, enquanto a VM Linux representa um servidor em ambiente simulado de Data Center. A conexão via SSH permite executar comandos de diagnóstico diretamente no servidor, validando DNS e conectividade.
 
 ## Cenário simulado
 
@@ -32,45 +36,28 @@ Possível causa: DNS
 
 ## Ambiente utilizado
 
-Preencher conforme o ambiente usado:
-
 ```text
-Sistema operacional:
-Rede utilizada:
-Tipo de conexão:
-Data do teste:
-```
-
-Exemplo:
-
-```text
-Sistema operacional: Windows 11
-Rede utilizada: rede doméstica
-Tipo de conexão: Wi-Fi
+Sistema operacional da estação técnica: macOS
+Servidor simulado: VM Linux Ubuntu via UTM
+Acesso ao servidor: SSH
+Rede utilizada: rede local
 Data do teste: 24/06/2026
 ```
 
 ---
 
-# Teste 1 — Verificar configuração de rede
+# Teste 1 — Verificar configuração de rede e DNS
 
-## Windows
+## Comandos utilizados
 
-Comando:
-
-```bash
-ipconfig /all
-```
-
-## Linux
-
-Comando:
+No macOS:
 
 ```bash
-ip addr
+ipconfig getifaddr en0
+route -n get default
 ```
 
-E também:
+Na VM Linux:
 
 ```bash
 cat /etc/resolv.conf
@@ -78,42 +65,33 @@ cat /etc/resolv.conf
 
 ## Objetivo do teste
 
-Verificar as configurações de rede da máquina, incluindo:
-
-- Endereço IP
-- Gateway padrão
-- Servidor DNS configurado
-- Adaptador de rede ativo
+Verificar se a estação técnica possui IP e gateway configurados, além de identificar como a VM Linux trata a resolução DNS.
 
 ## Resultado observado
 
-Preencher com o resultado do seu teste:
-
 ```text
-Resultado:
+A estação técnica macOS possui IP 192.168.18.3 e gateway padrão 192.168.18.1.
+
+Na VM Linux, a resolução DNS é gerenciada pelo systemd-resolved, utilizando o endereço local 127.0.0.53 como resolvedor DNS.
 ```
 
 ## Interpretação técnica
 
-Preencher após executar o comando:
-
 ```text
-Interpretação:
-```
+A estação técnica possui IP válido e gateway configurado.
 
-Exemplo:
+A VM Linux utiliza o systemd-resolved, recurso comum em distribuições Linux modernas. O endereço 127.0.0.53 atua como resolvedor DNS local, encaminhando as consultas para os servidores DNS configurados na rede.
 
-```text
-A máquina possui IP válido, gateway configurado e servidor DNS definido. Isso indica que a configuração básica de rede está presente.
+Isso indica que existe configuração básica de rede e DNS no ambiente analisado.
 ```
 
 ---
 
 # Teste 2 — Testar resolução DNS com nslookup
 
-## Windows ou Linux
+## Comando utilizado
 
-Comando:
+Na VM Linux:
 
 ```bash
 nslookup google.com
@@ -121,26 +99,24 @@ nslookup google.com
 
 ## Objetivo do teste
 
-Verificar se o DNS consegue resolver um nome de domínio para um endereço IP.
-
-## Resultado esperado
-
-O comando deve retornar um ou mais endereços IP associados ao domínio consultado.
+Verificar se a VM Linux consegue resolver um nome de domínio para endereço IP.
 
 ## Resultado observado
 
-Preencher com o resultado do seu teste:
-
 ```text
-Resultado:
+O comando nslookup google.com utilizou o servidor DNS 127.0.0.53 e resolveu o domínio google.com para o endereço IPv4 172.217.172.142.
+
+Também foi retornado um endereço IPv6 para o domínio consultado.
 ```
 
 ## Interpretação técnica
 
-Exemplo:
-
 ```text
-O domínio google.com foi resolvido corretamente para endereços IP. Isso indica que a resolução DNS está funcionando neste teste.
+A resolução DNS funcionou corretamente.
+
+O domínio google.com foi resolvido para endereço IPv4 e também apresentou endereço IPv6, indicando que a VM consegue consultar o DNS configurado.
+
+Neste cenário, não há evidência de falha na resolução de nomes.
 ```
 
 ## Aplicação em Data Center
@@ -153,9 +129,9 @@ Se o nome não resolver, o problema pode estar no registro DNS, no servidor DNS 
 
 # Teste 3 — Testar conectividade pelo nome
 
-## Windows ou Linux
+## Comando utilizado
 
-Comando:
+Na VM Linux:
 
 ```bash
 ping google.com
@@ -165,83 +141,58 @@ ping google.com
 
 Verificar se o nome é resolvido e se existe conectividade até o destino.
 
-## Resultado esperado
-
-O comando deve resolver o nome para um IP e tentar enviar pacotes ao destino.
-
 ## Resultado observado
 
-Preencher com o resultado do seu teste:
-
 ```text
-Resultado:
+O comando ping google.com resolveu o domínio para o IP 172.217.172.142.
+
+Foram transmitidos 10 pacotes, todos recebidos com sucesso, resultando em 0% de perda de pacotes.
 ```
 
 ## Interpretação técnica
 
-Exemplo:
-
 ```text
-O nome foi resolvido e houve resposta ao ping. Isso indica que DNS e conectividade básica estão funcionando para este destino.
+O teste confirmou que a VM Linux consegue resolver o nome google.com e também possui conectividade até o destino.
+
+Como não houve perda de pacotes, não foi identificada falha de DNS ou de conectividade básica neste teste.
 ```
 
 ## Atenção
 
 Alguns servidores podem bloquear resposta ao ping. Nesse caso, a ausência de resposta não significa necessariamente que o serviço está fora do ar.
 
-Por isso, é importante combinar esse teste com outros comandos, como `nslookup`, `tracert`, `traceroute` ou `curl`.
+Por isso, é importante combinar esse teste com outros comandos, como `nslookup`, `dig`, `traceroute` ou `curl`.
 
 ---
 
 # Teste 4 — Testar resolução de registro IPv6
 
-## Windows
+## Comando utilizado
 
-Comando:
-
-```bash
-nslookup -type=AAAA google.com
-```
-
-## Linux
-
-Comando:
-
+Na VM Linux:
 
 ```bash
 dig AAAA google.com
-```
-
-## macOS
-
-### Ver IP da interface principal
-
-```bash
-ipconfig getifaddr en0
 ```
 
 ## Objetivo do teste
 
 Verificar se o domínio possui registro DNS do tipo `AAAA`, usado para endereços IPv6.
 
-## Resultado esperado
-
-O comando pode retornar um ou mais endereços IPv6.
-
 ## Resultado observado
 
-Preencher com o resultado do seu teste:
-
 ```text
-Resultado:
+O comando dig AAAA google.com foi utilizado para consultar registros IPv6 do domínio google.com.
+
+O teste tem como objetivo validar se o domínio possui resolução DNS para IPv6.
 ```
 
 ## Interpretação técnica
 
-Exemplo:
-
 ```text
-O domínio possui registro AAAA, indicando que pode ser acessado por IPv6 caso a rede tenha suporte.
+A consulta de registro AAAA ajuda a identificar se um domínio possui endereço IPv6 associado.
+
+Em ambientes de Data Center e cloud, esse teste é importante porque uma aplicação pode funcionar em IPv4 e apresentar falha em IPv6, ou o contrário.
 ```
 
 ## Aplicação em Data Center
@@ -254,52 +205,40 @@ Por isso, validar registros `A` e `AAAA` ajuda a separar problemas de IPv4, IPv6
 
 # Teste 5 — Comparar acesso por nome e por IP
 
-## Passo 1 — Resolver o nome
+## Comandos utilizados
 
-Comando:
+Resolver o nome:
 
 ```bash
 nslookup google.com
 ```
 
-Anote um dos IPs retornados.
-
-## Passo 2 — Testar acesso pelo IP
-
-Comando:
+Testar conectividade pelo nome:
 
 ```bash
-ping IP_RETORNADO
-```
-
-Exemplo:
-
-```bash
-ping 142.250.218.78
+ping google.com
 ```
 
 ## Objetivo do teste
 
-Comparar se o acesso funciona pelo nome e também pelo IP.
+Comparar se o acesso funciona pelo nome e se o domínio é resolvido corretamente para um endereço IP.
 
 ## Resultado observado
 
-Preencher com o resultado do seu teste:
-
 ```text
-Resultado:
+O domínio google.com foi resolvido para o IP 172.217.172.142.
+
+O teste de ping pelo nome obteve resposta com 0% de perda de pacotes.
 ```
 
 ## Interpretação técnica
 
-Use este raciocínio:
-
 ```text
-Se funciona pelo IP, mas não pelo nome, o problema pode estar no DNS.
+Como o acesso pelo nome funcionou e o domínio foi resolvido para um IP válido, não há evidência de falha de DNS neste cenário.
 
-Se não funciona pelo IP nem pelo nome, o problema pode estar em conectividade, rota, firewall ou indisponibilidade do destino.
+Caso o acesso pelo IP funcionasse e pelo nome falhasse, a principal hipótese seria problema de DNS.
 
-Se funciona pelo nome e pelo IP, DNS e conectividade básica estão funcionando para este teste.
+Caso o acesso falhasse tanto pelo IP quanto pelo nome, a investigação deveria seguir para rota, gateway, firewall, conectividade ou indisponibilidade do serviço.
 ```
 
 ---
@@ -307,58 +246,25 @@ Se funciona pelo nome e pelo IP, DNS e conectividade básica estão funcionando 
 # Checklist de análise DNS
 
 ```text
-[ ] A máquina possui IP válido?
-[ ] Existe servidor DNS configurado?
-[ ] O domínio resolve para um IP?
-[ ] O IP retornado parece válido?
-[ ] O domínio possui registro A?
-[ ] O domínio possui registro AAAA?
-[ ] O acesso funciona pelo nome?
-[ ] O acesso funciona pelo IP?
-[ ] A falha ocorre apenas em um domínio?
-[ ] A falha ocorre em vários domínios?
+[x] A estação técnica possui IP válido?
+[x] A estação técnica possui gateway configurado?
+[x] A VM Linux possui resolvedor DNS configurado?
+[x] O domínio resolve para um IP?
+[x] O IP retornado parece válido?
+[x] O domínio possui resposta para IPv4?
+[x] O domínio apresenta suporte a IPv6?
+[x] O acesso funciona pelo nome?
+[x] A VM possui conectividade básica com o destino?
+[ ] Há evidência de falha de DNS?
 ```
 
 ---
 
-# Registro de evidência do laboratório
+# Evidências
 
-Preencha após realizar os testes:
+### 1. Configuração de rede da estação técnica macOS
 
-```text
-Data:
-Sistema operacional:
-Rede utilizada:
-
-Teste 1 — Configuração de rede:
-Resultado:
-Interpretação:
-
-Teste 2 — nslookup:
-Resultado:
-Interpretação:
-
-Teste 3 — ping por nome:
-Resultado:
-Interpretação:
-
-Teste 4 — registro AAAA:
-Resultado:
-Interpretação:
-
-Teste 5 — comparação nome x IP:
-Resultado:
-Interpretação:
-
-Conclusão geral:
-```
-
-
-## Evidências
-
-### 1. Configuração DNS da VM Linux
-
-![Configuração DNS](../evidencias/dns/01-dns-config-vm-linux.png)
+![Configuração de rede macOS](../evidencias/dns/01-dns-config-vm-linux.png)
 
 ### 2. Resolução DNS com nslookup
 
@@ -368,17 +274,51 @@ Conclusão geral:
 
 ![ping google.com](../evidencias/dns/03-ping-google-vm-linux.png)
 
-### 4 . IPv6 - DNS AAAA
-![ping google.com](../evidencias/dns/04-dig-aaaa-google-vm-linux.png)
+### 4. Consulta de registro IPv6 AAAA
+
+![dig AAAA google.com](../evidencias/dns/04-dig-aaaa-google-vm-linux.png)
 
 ---
 
-## Conclusão do Lab DNS
+# Registro de evidência do laboratório
 
-A VM Linux utiliza `systemd-resolved`, identificado pelo endereço local `127.0.0.53` no arquivo `/etc/resolv.conf`.
+```text
+Data: 24/06/2026
+Estação técnica: macOS
+Servidor simulado: VM Linux Ubuntu via UTM
+Tipo de acesso: SSH
+Rede utilizada: rede local
 
-Esse endereço funciona como um resolvedor DNS local, encaminhando as consultas para os servidores DNS configurados na rede.
+Teste 1 — Configuração de rede e DNS:
+Resultado: estação técnica com IP 192.168.18.3 e gateway 192.168.18.1. VM Linux utilizando systemd-resolved com 127.0.0.53.
+Interpretação: configuração básica de rede e DNS presente.
 
-Nos testes realizados, a VM conseguiu resolver nomes de domínio e testar conectividade pelo nome, indicando que a resolução DNS está funcionando corretamente neste cenário.
+Teste 2 — nslookup:
+Resultado: google.com resolvido para IPv4 172.217.172.142 e também com retorno IPv6.
+Interpretação: resolução DNS funcionando corretamente.
 
-Em um ambiente de Data Center, esse tipo de validação ajuda o técnico a diferenciar falhas de DNS de problemas de rota, firewall, conectividade ou serviço.
+Teste 3 — ping por nome:
+Resultado: 10 pacotes transmitidos, 10 recebidos, 0% de perda.
+Interpretação: DNS e conectividade básica funcionando.
+
+Teste 4 — registro AAAA:
+Resultado: consulta usada para validar registro IPv6 do domínio.
+Interpretação: teste importante para diferenciar falhas de IPv4, IPv6 e DNS.
+
+Conclusão geral:
+Neste cenário, não foi identificada falha de DNS. A VM Linux conseguiu resolver nomes e testar conectividade pelo nome.
+```
+
+---
+
+# Conclusão do Lab DNS
+
+A estação técnica macOS possui IP válido e gateway padrão configurado.
+
+A VM Linux utiliza `systemd-resolved`, identificado pelo endereço local `127.0.0.53`, que atua como resolvedor DNS local.
+
+Nos testes realizados, o domínio `google.com` foi resolvido corretamente para endereço IPv4 e também apresentou endereço IPv6. O teste de conectividade pelo nome obteve resposta com 0% de perda de pacotes.
+
+Neste cenário, não foi identificada falha de DNS.
+
+Em uma rotina de Data Center, esse tipo de validação ajuda o técnico a diferenciar problemas de resolução de nomes de falhas de rota, firewall, conectividade ou serviço.
