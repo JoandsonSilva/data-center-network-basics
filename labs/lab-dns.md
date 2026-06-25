@@ -373,14 +373,12 @@ Conclusão geral:
 
 ---
 
-# Conclusão do laboratório
+## Conclusão do Lab DNS
 
-Este laboratório demonstrou como utilizar comandos básicos para diagnosticar problemas de DNS.
+A VM Linux utiliza `systemd-resolved`, identificado pelo endereço local `127.0.0.53` no arquivo `/etc/resolv.conf`.
 
-Em uma rotina de Data Center, esses testes ajudam o técnico a identificar se uma falha de acesso está relacionada à resolução de nomes, conectividade, rota, IPv6, firewall ou serviço.
+Esse endereço funciona como um resolvedor DNS local, encaminhando as consultas para os servidores DNS configurados na rede.
 
-A VM Linux possui servidor DNS configurado, conseguiu resolver o domínio google.com e realizou teste de conectividade pelo nome.
+Nos testes realizados, a VM conseguiu resolver nomes de domínio e testar conectividade pelo nome, indicando que a resolução DNS está funcionando corretamente neste cenário.
 
-Com isso, neste cenário, não foi identificada falha de DNS. Em um ambiente de Data Center, esse tipo de teste ajudaria a separar problemas de resolução de nomes de problemas de rota, firewall ou serviço.
-
-O objetivo não é apenas executar comandos, mas interpretar os resultados e registrar evidências para apoiar a resolução ou escalonamento do incidente.
+Em um ambiente de Data Center, esse tipo de validação ajuda o técnico a diferenciar falhas de DNS de problemas de rota, firewall, conectividade ou serviço.
