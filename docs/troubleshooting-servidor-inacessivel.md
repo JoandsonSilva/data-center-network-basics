@@ -8,7 +8,7 @@ Etapa 6 de 7 — Procedimento de troubleshooting aplicado a Data Center.
 
 Este documento apresenta um procedimento inicial de diagnóstico para casos em que um servidor ou aplicação em ambiente de Data Center está inacessível.
 
-O foco é organizar uma sequência lógica de verificação envolvendo DNS, IP, rota, gateway, IPv6, firewall e serviço.
+O foco é organizar uma sequência lógica de verificação envolvendo DNS, IP, rota, gateway, IPv6, firewall, serviço e conectividade externa.
 
 ## Cenário simulado
 
@@ -27,11 +27,12 @@ O técnico precisa identificar se o problema está relacionado a:
 - IPv6
 - Firewall
 - Serviço parado
+- Porta não exposta
 - Conectividade física ou lógica
 
 ## Mentalidade operacional
 
-Em ambiente de Data Center, o objetivo não é apenas “testar comandos”.
+Em ambiente de Data Center, o objetivo não é apenas executar comandos.
 
 O objetivo é:
 
@@ -158,12 +159,18 @@ nslookup google.com
 dig google.com
 ```
 
+```bash
+dig AAAA google.com
+```
+
 ## Interpretação
 
 ```text
 Se o DNS resolve corretamente, a camada de resolução de nomes está funcionando.
 
 Se o DNS não resolve, o problema pode estar no resolvedor local, servidor DNS, registro DNS, cache ou conectividade com o DNS.
+
+Se o registro AAAA retorna IPv6, o técnico também deve considerar possíveis diferenças entre IPv4 e IPv6.
 ```
 
 ---
@@ -208,10 +215,16 @@ ou:
 curl -I https://app.empresa.local
 ```
 
-Também pode ser usado:
+Para verificar portas e serviços em escuta:
 
 ```bash
 ss -tulnp
+```
+
+ou, sem exibir processo:
+
+```bash
+ss -tuln
 ```
 
 ## Interpretação
@@ -220,6 +233,8 @@ ss -tulnp
 Se o servidor responde ping, mas a aplicação não abre, o problema pode estar no serviço, porta, firewall local ou aplicação.
 
 Se a porta não está em escuta, o serviço pode estar parado ou mal configurado.
+
+Se o curl retorna cabeçalhos HTTP, significa que houve resposta de um serviço web.
 ```
 
 ---
@@ -227,21 +242,18 @@ Se a porta não está em escuta, o serviço pode estar parado ou mal configurado
 # Checklist de troubleshooting
 
 ```text
-[ ] O incidente foi registrado?
-[ ] O impacto foi identificado?
-[ ] O servidor possui IP válido?
-[ ] A interface de rede está ativa?
-[ ] Existe rota padrão?
-[ ] O gateway responde?
-[ ] O acesso por IP funciona?
-[ ] O acesso por nome funciona?
-[ ] O DNS resolve corretamente?
-[ ] Existe registro A?
-[ ] Existe registro AAAA?
-[ ] IPv4 e IPv6 foram diferenciados?
-[ ] O serviço está em execução?
+[x] O servidor possui IP válido?
+[x] A interface de rede está ativa?
+[x] Existe rota padrão?
+[x] O gateway foi identificado?
+[x] O acesso por IP externo funciona?
+[x] O DNS resolve corretamente?
+[x] Existe registro A?
+[x] Existe registro AAAA?
+[x] IPv4 e IPv6 foram diferenciados?
+[x] Foi testado acesso HTTP/HTTPS com curl?
+[x] Foram verificadas portas e serviços em escuta?
 [ ] Há evidência de firewall ou bloqueio?
-[ ] O problema foi documentado?
 [ ] O incidente precisa ser escalado?
 ```
 
@@ -261,6 +273,12 @@ Hipótese provável: rota, NAT, firewall ou bloqueio de saída
 
 Sintoma: DNS resolve, ping responde, mas aplicação não abre
 Hipótese provável: serviço parado, porta bloqueada ou falha na aplicação
+
+Sintoma: curl retorna cabeçalhos HTTP
+Hipótese provável: existe resposta de serviço web
+
+Sintoma: porta não aparece em escuta no ss
+Hipótese provável: serviço parado ou aplicação não inicializada
 
 Sintoma: IPv4 funciona, IPv6 falha
 Hipótese provável: rota IPv6, registro AAAA, firewall IPv6 ou suporte IPv6 incompleto
@@ -297,7 +315,8 @@ Resultados:
 - Gateway:
 - Rota:
 - IPv6:
-- Serviço:
+- HTTP/HTTPS:
+- Portas/serviços:
 
 Causa provável:
 
@@ -320,10 +339,12 @@ Lições aprendidas:
 ```text
 Incidente: Validação de conectividade em servidor simulado
 
+Data: 25/06/2026
 Ambiente: VM Linux Ubuntu via UTM
 Acesso: SSH
 IP do servidor: 192.168.64.8
 Gateway: 192.168.64.1
+Estação técnica: macOS
 
 Testes realizados:
 1. ip addr
@@ -331,19 +352,46 @@ Testes realizados:
 3. ping 8.8.8.8
 4. nslookup google.com
 5. dig AAAA google.com
+6. ip -6 addr
+7. ip -6 route
+8. curl -I https://google.com
+9. ss -tulnp
 
 Resultados:
-- Servidor possui IP válido.
-- Rota padrão configurada.
-- Conectividade externa por IP funcionando.
-- DNS funcionando.
-- Registro AAAA retornado com sucesso.
+- IP: servidor possui IP válido na interface enp0s1.
+- Gateway: gateway identificado como 192.168.64.1.
+- Rota: rota padrão configurada corretamente.
+- Conectividade externa: ping para 8.8.8.8 funcionou com 0% de perda.
+- DNS: resolução de nomes funcionando via 127.0.0.53.
+- IPv6: servidor possui endereço IPv6 e rota IPv6 configurada.
+- DNS IPv6: registro AAAA retornado com sucesso para google.com.
+- HTTP/HTTPS: curl retornou HTTP/2 301, indicando resposta válida de serviço web externo.
+- Portas/serviços: ss mostrou serviços em escuta, incluindo DNS local na porta 53 e SSH na porta 22.
 
 Causa provável:
-Não foi identificada falha neste cenário.
+Não foi identificada falha de DNS, roteamento, IPv6 ou conectividade externa neste cenário.
+
+Ação tomada:
+Foram registrados comandos, resultados e evidências para validar conectividade básica do servidor simulado.
+
+Status:
+Resolvido / Validado em laboratório.
 
 Conclusão:
-O servidor simulado possui conectividade básica, rota padrão, DNS e IPv6 configurados. Em caso real, a investigação seguiria para firewall, porta, serviço da aplicação ou camada superior.
+O servidor simulado possui IP válido, rota padrão, DNS funcional, IPv6 configurado, conectividade externa e resposta HTTP/HTTPS. Em um incidente real, caso uma aplicação específica continuasse inacessível, a investigação seguiria para firewall, porta, serviço da aplicação, logs ou camada de aplicação.
+```
+
+---
+
+# Evidência complementar
+
+O teste complementar com `curl` e `ss` validou:
+
+```text
+- Resposta HTTP/HTTPS externa com status HTTP/2 301.
+- Serviços em escuta na VM Linux.
+- Porta 22 aberta para SSH.
+- Porta 53 utilizada por serviços locais de DNS.
 ```
 
 ---
@@ -352,6 +400,6 @@ O servidor simulado possui conectividade básica, rota padrão, DNS e IPv6 confi
 
 Este procedimento organiza uma análise inicial de servidor inacessível em ambiente de Data Center.
 
-A sequência ajuda o técnico a evitar diagnósticos precipitados, separar falhas de DNS, rota, IPv6, firewall e serviço, além de registrar evidências para resolução ou escalonamento.
+A sequência ajuda o técnico a evitar diagnósticos precipitados, separar falhas de DNS, rota, IPv6, firewall, porta e serviço, além de registrar evidências para resolução ou escalonamento.
 
 Em ambientes críticos, a documentação do diagnóstico é tão importante quanto a execução dos comandos.
