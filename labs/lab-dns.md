@@ -264,19 +264,19 @@ Caso o acesso falhasse tanto pelo IP quanto pelo nome, a investigação deveria 
 
 ### 1. Configuração de rede da estação técnica macOS
 
-![Configuração de rede macOS](../evidencias/dns/01-dns-config-vm-linux.png)
+![Configuração de rede macOS](../evidências/dns/01-dns-config-vm-linux.png)
 
 ### 2. Resolução DNS com nslookup
 
-![nslookup google.com](../evidencias/dns/02-nslookup-google-vm-linux.png)
+![nslookup google.com](../evidências/dns/02-nslookup-google-vm-linux.png)
 
 ### 3. Teste de conectividade pelo nome
 
-![ping google.com](../evidencias/dns/03-ping-google-vm-linux.png)
+![ping google.com](../evidências/dns/03-ping-google-vm-linux.png)
 
 ### 4. Consulta de registro IPv6 AAAA
 
-![dig AAAA google.com](../evidencias/dns/04-dig-aaaa-google-vm-linux.png)
+![dig AAAA google.com](../evidências/dns/04-dig-aaaa-google-vm-linux.png)
 
 ---
 
