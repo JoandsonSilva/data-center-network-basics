@@ -1,5 +1,9 @@
 # Lab Roteamento — Diagnóstico de Gateway e Rotas
 
+## Status da etapa
+
+Etapa 4 de 7 — Lab Roteamento com evidências.
+
 ## Objetivo
 
 Este laboratório tem como objetivo validar IP, rota padrão, gateway e conectividade externa em uma VM Linux acessada via SSH.
@@ -30,17 +34,17 @@ Se um servidor possui IP válido, mas não consegue acessar redes externas, o pr
 
 ```text
 Estação técnica: macOS
-Servidor simulado: VM Linux via UTM
+Servidor simulado: VM Linux Ubuntu via UTM
 Acesso: SSH
-Rede utilizada:
-Data do teste:
+Rede utilizada: rede local / NAT da VM
+Data do teste: 24/06/2026
 ```
 
 ---
 
 # Teste 1 — Verificar IP da VM Linux
 
-## Comando
+## Comando utilizado
 
 ```bash
 ip addr
@@ -53,20 +57,26 @@ Confirmar se a VM possui interface de rede ativa e endereço IP configurado.
 ## Resultado observado
 
 ```text
-Preencher com o resultado resumido.
+A VM Linux possui a interface enp0s1 ativa, com endereço IPv4 192.168.64.8/24.
+
+Também foram identificados endereços IPv6 configurados na interface, incluindo endereço global e endereço link-local.
 ```
 
 ## Interpretação técnica
 
 ```text
-A VM Linux possui endereço IP configurado e interface de rede ativa, indicando que a configuração básica de rede está presente.
+A interface de rede da VM Linux está ativa e possui endereço IP válido.
+
+Isso indica que a configuração básica de rede está presente no servidor simulado.
+
+Em um ambiente de Data Center, esse seria um dos primeiros pontos verificados ao investigar um servidor com falha de conectividade.
 ```
 
 ---
 
 # Teste 2 — Verificar rota padrão da VM Linux
 
-## Comando
+## Comando utilizado
 
 ```bash
 ip route
@@ -76,29 +86,35 @@ ip route
 
 Verificar se existe uma rota padrão configurada.
 
-A rota padrão normalmente aparece como:
-
-```text
-default via ENDERECO_DO_GATEWAY
-```
+A rota padrão indica para qual gateway o servidor deve enviar tráfego destinado a redes externas.
 
 ## Resultado observado
 
 ```text
-Preencher com o resultado resumido.
+A VM Linux possui rota padrão configurada:
+
+default via 192.168.64.1 dev enp0s1 proto dhcp src 192.168.64.8 metric 100
+
+Também foi identificada a rede local:
+
+192.168.64.0/24 dev enp0s1
 ```
 
 ## Interpretação técnica
 
 ```text
-A VM Linux possui rota padrão configurada, indicando que o servidor sabe para qual gateway enviar tráfego destinado a redes externas.
+A VM Linux possui rota padrão configurada para o gateway 192.168.64.1.
+
+Isso indica que o servidor sabe para onde encaminhar tráfego destinado a redes externas.
+
+Em um ambiente de Data Center, a ausência de rota padrão poderia impedir o servidor de acessar outras redes, serviços externos, repositórios, APIs ou sistemas de monitoramento.
 ```
 
 ---
 
 # Teste 3 — Testar conectividade externa por IP
 
-## Comando
+## Comando utilizado
 
 ```bash
 ping 8.8.8.8
@@ -113,13 +129,19 @@ Esse teste ajuda a diferenciar problemas de roteamento de problemas de resoluç�
 ## Resultado observado
 
 ```text
-Preencher com o resultado resumido.
+O teste de ping para 8.8.8.8 obteve resposta com sucesso.
+
+Foram transmitidos 12 pacotes, todos recebidos, resultando em 0% de perda de pacotes.
 ```
 
 ## Interpretação técnica
 
 ```text
-A VM Linux conseguiu comunicação com um IP externo. Isso indica que a rota padrão, o gateway e a conectividade externa estão funcionando neste cenário.
+A VM Linux conseguiu comunicação com um IP externo.
+
+Isso indica que a rota padrão, o gateway e a conectividade externa estão funcionando neste cenário.
+
+Como o teste foi feito diretamente por IP, ele não depende de DNS. Portanto, se uma aplicação falhasse pelo nome, a investigação deveria considerar DNS, serviço, firewall ou aplicação, e não apenas roteamento.
 ```
 
 ---
@@ -128,36 +150,66 @@ A VM Linux conseguiu comunicação com um IP externo. Isso indica que a rota pad
 
 ### 1. IP da VM Linux
 
-![IP da VM Linux](../evidencias/roteamento/01-ip-addr-vm-linux.png)
+![IP da VM Linux](evidências/roteamento/01-ip-addr-vm-linux.png)
 
 ### 2. Rota padrão da VM Linux
 
-![Rota padrão da VM Linux](../evidencias/roteamento/02-ip-route-vm-linux.png)
+![Rota padrão da VM Linux](evidências/roteamento/02-ip-route-vm-linux.png)
 
 ### 3. Ping para IP externo
 
-![Ping para IP externo](../evidencias/roteamento/03-ping-externo-vm-linux.png)
+![Ping para IP externo](evidências/roteamento/03-ping-externo-vm-linux.png)
 
 ---
 
 # Checklist de diagnóstico de roteamento
 
 ```text
-[ ] A VM possui IP válido?
-[ ] A interface de rede está ativa?
-[ ] Existe rota padrão?
-[ ] O gateway foi identificado?
-[ ] A VM consegue acessar IP externo?
-[ ] O problema pode estar relacionado a DNS?
+[x] A VM possui IP válido?
+[x] A interface de rede está ativa?
+[x] Existe rota padrão?
+[x] O gateway foi identificado?
+[x] A VM consegue acessar IP externo?
+[x] O teste foi feito sem depender de DNS?
+[ ] Há evidência de falha de roteamento?
 [ ] O problema pode estar relacionado a firewall, NAT ou rota?
+```
+
+---
+
+# Registro de evidência do laboratório
+
+```text
+Data: 24/06/2026
+Estação técnica: macOS
+Servidor simulado: VM Linux Ubuntu via UTM
+Tipo de acesso: SSH
+Rede utilizada: rede local / NAT da VM
+
+Teste 1 — IP da VM Linux:
+Resultado: interface enp0s1 ativa com IPv4 192.168.64.8/24.
+Interpretação: a VM possui configuração básica de rede ativa.
+
+Teste 2 — Rota padrão:
+Resultado: rota padrão configurada via gateway 192.168.64.1.
+Interpretação: a VM possui caminho configurado para redes externas.
+
+Teste 3 — Ping para IP externo:
+Resultado: 12 pacotes transmitidos, 12 recebidos, 0% de perda.
+Interpretação: a VM possui conectividade externa por IP.
+
+Conclusão geral:
+Neste cenário, não foi identificada falha básica de roteamento. A VM possui IP válido, rota padrão e conectividade externa.
 ```
 
 ---
 
 # Conclusão do Lab Roteamento
 
-A VM Linux possui interface de rede ativa, rota padrão configurada e conectividade externa por IP.
+A VM Linux possui interface de rede ativa, endereço IPv4 válido, rota padrão configurada e conectividade externa por IP.
+
+O gateway identificado foi `192.168.64.1`, e a VM conseguiu comunicação com o IP externo `8.8.8.8` sem perda de pacotes.
 
 Neste cenário, não foi identificada falha de roteamento básica.
 
-Em um ambiente de Data Center, esse tipo de validação ajuda o técnico a diferenciar falhas de rota, gateway, DNS, firewall, NAT ou indisponibilidade de serviço.
+Em uma rotina de Data Center, esse tipo de validação ajuda o técnico a diferenciar falhas de rota, gateway, DNS, firewall, NAT ou indisponibilidade de serviço.
